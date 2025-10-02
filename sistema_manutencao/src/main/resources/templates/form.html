@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sistema de Manutenção</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .form-control, .form-select {
+            background-color: #2b3035;
+            border-color: #495057;
+            color: #f8f9fa;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #2b3035;
+            border-color: #86b7fe;
+            color: #f8f9fa;
+        }
+        .form-control:read-only {
+            background-color: #495057;
+            color: #adb5bd;
+        }
+    </style>
+</head>
+<body class="bg-dark">
+    <nav class="navbar navbar-dark bg-dark border-bottom border-secondary">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" th:href="@{/solicitacao}">
+                🔧 Sistema de Manutenção
+            </a>
+        </div>
+    </nav>
+
+    <main class="container mt-4 text-light">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <h1 th:text="${solicitacao.id != null} ? 'Editar Solicitação' : 'Nova Solicitação'" class="mb-4">
+                    Nova Solicitação
+                </h1>
+
+                <form th:action="${solicitacao.id != null} ? 
+                                  @{/solicitacao/edit/{id}(id=${solicitacao.id})} : 
+                                  @{/solicitacao/create}" 
+                      method="post"
+                      th:object="${solicitacao}">
+
+                    <!-- Campo ID (hidden) -->
+                    <input type="hidden" th:field="*{id}">
+
+                    <!-- Campo Solicitante -->
+                    <div class="mb-3">
+                        <label for="solicitante" class="form-label">Solicitante *</label>
+                        <input type="text" class="form-control" id="solicitante" 
+                               th:field="*{solicitante}"
+                               th:classappend="${#fields.hasErrors('solicitante')} ? 'is-invalid' : ''">
+                        <div th:if="${#fields.hasErrors('solicitante')}" class="invalid-feedback">
+                            <span th:errors="*{solicitante}"></span>
+                        </div>
+                    </div>
+
+                    <!-- Campo Descrição do Problema -->
+                    <div class="mb-3">
+                        <label for="descricaoProblema" class="form-label">Descrição do Problema *</label>
+                        <textarea class="form-control" id="descricaoProblema" rows="4"
+                                  th:field="*{descricaoProblema}"
+                                  th:classappend="${#fields.hasErrors('descricaoProblema')} ? 'is-invalid' : ''"></textarea>
+                        <div th:if="${#fields.hasErrors('descricaoProblema')}" class="invalid-feedback">
+                            <span th:errors="*{descricaoProblema}"></span>
+                        </div>
+                    </div>
+
+                    <!-- Campo Deadline -->
+                    <div class="mb-3">
+                        <label for="deadline" class="form-label">Prazo para Conclusão *</label>
+                        <input type="date" class="form-control" id="deadline" 
+                               th:field="*{deadline}"
+                               th:classappend="${#fields.hasErrors('deadline')} ? 'is-invalid' : ''"
+                               required>
+                        <div th:if="${#fields.hasErrors('deadline')}" class="invalid-feedback">
+                            <span th:errors="*{deadline}"></span>
+                        </div>
+                    </div>
+
+                    <!-- Campo Status -->
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status *</label>
+                        <select class="form-select" id="status" th:field="*{status}"
+                                th:classappend="${#fields.hasErrors('status')} ? 'is-invalid' : ''">
+                            <option value="">Selecione o status</option>
+                            <option value="PENDENTE" th:selected="${solicitacao.status?.name() == 'PENDENTE'}">PENDENTE</option>
+                            <option value="EM_ANDAMENTO" th:selected="${solicitacao.status?.name() == 'EM_ANDAMENTO'}">EM ANDAMENTO</option>
+                            <option value="FINALIZADA" th:selected="${solicitacao.status?.name() == 'FINALIZADA'}">FINALIZADA</option>
+                        </select>
+                        <div th:if="${#fields.hasErrors('status')}" class="invalid-feedback">
+                            <span th:errors="*{status}"></span>
+                        </div>
+                    </div>
+
+                    <!-- Campo Observação (opcional) -->
+                    <div class="mb-3">
+                        <label for="observacao" class="form-label">Observação</label>
+                        <textarea class="form-control" id="observacao" rows="2"
+                                  th:field="*{observacao}"></textarea>
+                        <div class="form-text text-light">Campo opcional para informações adicionais.</div>
+                    </div>
+
+                    <!-- Informações de data (somente leitura) -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Data de Solicitação</label>
+                            <input type="text" class="form-control" readonly
+                                   th:value="${solicitacao.dataSolicitacao != null} ? 
+                                           ${#temporals.format(solicitacao.dataSolicitacao, 'dd/MM/yyyy HH:mm')} : 
+                                           'A ser definida'">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Data de Finalização</label>
+                            <input type="text" class="form-control" readonly
+                                   th:value="${solicitacao.dataFinalizacao != null} ? 
+                                           ${#temporals.format(solicitacao.dataFinalizacao, 'dd/MM/yyyy HH:mm')} : 
+                                           '-'">
+                        </div>
+                    </div>
+
+                    <!-- Botões -->
+                    <div class="mb-3">
+                        <button type="submit" class="btn btn-primary">
+                            <span th:text="${solicitacao.id != null} ? 'Atualizar' : 'Salvar'">Salvar</span>
+                        </button>
+                        <a th:href="@{/solicitacao}" class="btn btn-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
